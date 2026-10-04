@@ -1,0 +1,48 @@
+{
+  "run_id": "93b34fc3",
+  "total_score": 0.7583,
+  "coverage_score": 0.5,
+  "efficiency_score": 1.0,
+  "stop_score": 1.0,
+  "sysmon_score": 0.6667,
+  "parse_failure_penalty": 0.0,
+  "stop_reason": "goal_achieved",
+  "steps_taken": 5,
+  "max_steps": 20,
+  "goal_met": true,
+  "detection_gaps": [
+    "T1003.006"
+  ],
+  "detections": {
+    "T1087.002": {
+      "agent_executed": true,
+      "sysmon_detected": true,
+      "detection_gap": false,
+      "notes": "Bulk TGS requests: 5 events (threshold \u22655)"
+    },
+    "T1558.003": {
+      "agent_executed": true,
+      "sysmon_detected": true,
+      "detection_gap": false,
+      "notes": "RC4 TGS requests detected: 2 event(s)"
+    },
+    "T1558.004": {
+      "agent_executed": false,
+      "sysmon_detected": true,
+      "detection_gap": false,
+      "notes": "AS-REP events detected: 2"
+    },
+    "T1003.006": {
+      "agent_executed": true,
+      "sysmon_detected": false,
+      "detection_gap": true,
+      "notes": "CRITICAL DETECTION GAP: DCSync executed but not detected \u2014 enable 4662 auditing on domain object with SACL"
+    },
+    "T1021.002": {
+      "agent_executed": false,
+      "sysmon_detected": true,
+      "detection_gap": false,
+      "notes": "Network/PtH logon events: 15; Agent did not attempt lateral movement in this run"
+    }
+  }
+}

