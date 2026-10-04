@@ -1,17 +1,8 @@
 <div align="center">
 
-```
- █████╗ ███████╗██╗   ██╗
-██╔══██╗██╔════╝██║   ██║
-███████║█████╗  ██║   ██║
-██╔══██║██╔══╝  ╚██╗ ██╔╝
-██║  ██║███████╗ ╚████╔╝ 
-╚═╝  ╚═╝╚══════╝  ╚═══╝  
-```
+# Agentic Adversarial Exposure Validation: An LLM-Driven Framework for Active Directory Environments
 
-**Adversarial Exposure Validation**
-
-*An AI-driven red teaming framework that attacks Active Directory and scores its own detection coverage — autonomously.*
+*Engineering Internship Project - Summer 2026 - COFICAB Group*
 
 [![Python](https://img.shields.io/badge/Python-3.11-3776AB?style=flat-square&logo=python&logoColor=white)](https://python.org)
 [![MITRE ATT&CK](https://img.shields.io/badge/MITRE-ATT%26CK-E3001B?style=flat-square)](https://attack.mitre.org)
@@ -24,9 +15,9 @@
 
 ## What is AEV?
 
-AEV is a Breach and Attack Simulation (BAS) framework with a twist: instead of running a hardcoded playbook, an LLM-driven agent **reasons its way** through an Active Directory attack chain — deciding which technique to use next based on what it knows about the domain state. After the run, a separate scoring engine reads Sysmon telemetry independently and reports which attacks your detection stack would have actually caught.
+AEV is a Breach and Attack Simulation (BAS) framework with a twist: instead of running a hardcoded playbook, an LLM-driven agent **reasons its way** through an Active Directory attack chain, deciding which technique to use next based on what it knows about the domain state. After the run, a separate scoring engine reads Sysmon telemetry independently and reports which attacks your detection stack would have actually caught.
 
-The question it answers isn't *"did the attack succeed?"* — it's **"which attacks succeeded silently?"**
+The question it answers isn't *"did the attack succeed?"* : it's **"which attacks succeeded silently?"**
 
 ---
 
@@ -87,25 +78,8 @@ AEV is two independent pipelines connected by a single JSONL run log.
 ---
 
 ## Attack Chain
+![](https://github.com/Beylessen1/Blog/blob/main/assets/images/Internship/Agent/2.png)
 
-```
-              [BloodHound Enum]
-                     │
-          ┌──────────┴──────────┐
-    [Kerberoasting]        [AS-REP Roasting]
-          │                     │
-          └──────────┬──────────┘
-                [Hashcat Crack]
-                     │
-              ┌──────┴──────┐
-           DA found?     Not yet
-              │              │
-          [DCSync]    [Lateral Movement]
-              │              │
-        Domain Owned    [Secrets Dump]
-                             │
-                         [Hashcat…]
-```
 
 The agent reasons through this tree. The hardcoded runner (`runner_hardcoded.py`) follows it in fixed order and serves as ground truth for tool validation.
 
@@ -200,17 +174,6 @@ python3 -m aev.scoring.score_run runs/7cff605d.jsonl
 
 ---
 
-## Why Not LangChain?
-
-Three reasons:
-
-1. **Auditability** — every decision in the attack chain needs to be traceable. A high-level agent abstraction delegates part of that control flow to the framework.
-2. **Tool contract** — each tool represents a security-sensitive ATT&CK technique with strict preconditions. That policy needs to stay independent of the LLM and the orchestration layer.
-3. **Separation of responsibility** — the LLM proposes actions; it does not decide whether they're allowed, whether a privilege was obtained, or whether the run should terminate.
-
-The JSONL run log is load-bearing: it is the sole bridge between the agent and the scorer, and it makes every run independently auditable.
-
----
 
 ## Blog Series
 
@@ -222,18 +185,4 @@ This project is documented in a three-part series:
 | 2 | Building an Agentic Red Teamer | [→ Read](https://beylessen1.github.io/Blog/2026/09/09/Building-an-Agentic-Red-Teamer-Internship-Docs-2/) |
 | 3 | Agentic Adversarial Exposure Validation | [→ Read](https://beylessen1.github.io/Blog/2026/09/14/Agentic-Adversarial-Exposure-Validation-Internship-Docs-3/) |
 
----
 
-## What's Next
-
-- **4662 SACL fix** — enable replication auditing on the domain object, re-run, confirm DCSync detection closes the gap
-- **LangGraph migration** — native state graph checkpointing for long-running chains; the security logic stays ours, the runtime gets more robust
-- **Evasion research** — the interesting question isn't whether the agent can compromise the domain, it's whether it can do so quietly enough that the detection rules fail
-
----
-
-<div align="center">
-
-Built during a summer internship at COFICAB Tunisie · by [Beylessen Jendoubi](https://beylessen1.github.io/Blog)
-
-</div>
